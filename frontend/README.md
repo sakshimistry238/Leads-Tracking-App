@@ -1,77 +1,124 @@
-# React + TypeScript + Vite
+# Leads Tracking — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React 19 SPA built with Vite, TypeScript, React Query, React Router, and Axios. Connects to the NestJS backend.
 
-Currently, two official plugins are available:
+**Features**
+- Basic Auth login gate (credentials stored in `sessionStorage`)
+- Leads list with live search, status filter, and pagination
+- Lead detail page with inline edit and notes
+- Create lead form with client-side validation
+- Delete confirmation modal
+- Dark mode support (follows OS preference)
+- Accessible markup (ARIA labels, roles, focus management)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+## Requirements
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+- Node.js 18+
+- npm 9+
+- Backend running on `http://localhost:3000` (or set `VITE_API_URL`)
 
-Note: This will impact Vite dev & build performances.
+---
 
-## Expanding the ESLint configuration
+## Quick start
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+```bash
+# 1. Start the backend first (see backend/README.md)
+cd backend && npm run dev
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+# 2. Start the frontend
+cd frontend
+npm install
+npm run dev          # opens http://localhost:5173
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Demo credentials
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+| Username | Password  |
+|----------|-----------|
+| `admin`  | `admin123`|
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+---
+
+## Run tests
+
+```bash
+npm test             # Vitest – StatusBadge component tests
+npm run test:watch   # watch mode
+```
+
+---
+
+## Build for production
+
+```bash
+npm run build        # outputs to dist/
+npm run preview      # preview the production build locally
+```
+
+---
+
+## Environment variables
+
+Create a `.env` file in the `frontend/` directory if the backend is not on localhost:
+
+```env
+VITE_API_URL=http://your-backend-host:3000
+```
+
+If `VITE_API_URL` is not set, all `/api/*` requests are proxied to `http://localhost:3000` via the Vite dev-server proxy.
+
+---
+
+## Docker
+
+```bash
+# From the repo root
+docker compose up --build
+```
+
+Frontend served at `http://localhost:80`.
+API calls are proxied through nginx to the backend container automatically.
+
+---
+
+## Project structure
 
 ```
+src/
+├── main.tsx              # Entry — BrowserRouter, QueryClient, AuthProvider
+├── App.tsx               # Route definitions + auth gate
+├── index.css             # Design tokens + all component styles
+├── api/
+│   ├── client.ts         # Axios instance with Basic-Auth interceptor
+│   ├── leads.ts          # Leads API functions
+│   └── notes.ts          # Notes API functions
+├── types/
+│   └── index.ts          # Shared TypeScript types
+├── context/
+│   └── AuthContext.tsx   # Auth state + login/logout
+├── components/
+│   ├── LoginPage.tsx
+│   ├── Navbar.tsx
+│   ├── StatusBadge.tsx
+│   ├── Spinner.tsx
+│   ├── ErrorMessage.tsx
+│   └── Pagination.tsx
+├── pages/
+│   ├── LeadsListPage.tsx
+│   ├── LeadDetailPage.tsx
+│   └── CreateLeadPage.tsx
+└── __tests__/
+    └── StatusBadge.test.tsx
+```
+
+---
+
+## Pages
+
+| Route          | Description                                     |
+|----------------|-------------------------------------------------|
+| `/`            | Leads list — search, filter by status, paginate |
+| `/leads/new`   | Create a new lead                               |
+| `/leads/:id`   | Lead detail — view, edit, delete, add notes     |
